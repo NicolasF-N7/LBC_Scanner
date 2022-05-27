@@ -16,8 +16,6 @@ puppeteer.use(StealthPlugin())
 const AdblockerPlugin = require('puppeteer-extra-plugin-adblocker')
 puppeteer.use(AdblockerPlugin({ blockTrackers: true }))
 
-let url = "https://www.leboncoin.fr/"
-
 //==========LAUNCH PUPPETEER===========
 // That's it, the rest is puppeteer usage as normal 😊
 puppeteer.launch({ headless: false, defaultViewport: null, args:['--start-maximized'] }).then(async browser => {
@@ -34,13 +32,36 @@ puppeteer.launch({ headless: false, defaultViewport: null, args:['--start-maximi
 	const deserializedCookies = JSON.parse(cookies);
 	await page.setCookie(...deserializedCookies);
 
-  await page.goto(url, {waitUntil : 'domcontentloaded'});
+  let searchURL = "https://www.leboncoin.fr/recherche?category=3&text=" + encodeURI(config.search_input) + "&locations=Toulouse__43.59743304757554_1.4471155185604891_10000_20000"
+  await page.goto(searchURL, {waitUntil : 'domcontentloaded'});
 
-  await page.waitForTimeout(50000)
+	/* HTML Structure of LBC
+	<div class="styles_classifiedColumn__FvVg5">
+		<div class="sc-bdVaJa fKGgoF">
+			This is the list of ads elements
+			<div class="styles_adCard__HQRFN styles_classified__rnsg4"></div>
+			<div class="styles_adCard__HQRFN styles_classified__rnsg4"></div>
+			<div class="styles_adCard__HQRFN styles_classified__rnsg4"></div>
+			...
+		</div>
+	</div>
+	*/
+	let mainContainerSelector = "div.sc-bdVaJa.fKGgoF";
+	//let mainContainerSelector = "#mainContent > div.sc-PLyBE.eAbTXL > div > div.styles_Listing__rqSnx.styles_listing--generic__VwY9Y > div.styles_classifiedColumn__FvVg5";
+	//let adListElemSelector = "#mainContent > div.sc-iGrrsa.bJUYEF > div > div.styles_Listing__rqSnx.styles_listing--bigPicture__d_z8s > div.styles_classifiedColumn__FvVg5 > div.sc-bdVaJa.fKGgoF > div:nth-child(1)";
 
+	await page.waitForSelector(mainContainerSelector);
+  const mainContainer = await page.$$(mainContainerSelector);
+  //const firstChild = ads_list[0];
+  let adsList = await mainContainer.evaluate(el => el.innerHTML);
+  console.log(mainContainer);
+  console.log(adsList);
+  //const firstChild = await
+
+  /*await page.waitForTimeout(50000)
   cookies = await page.cookies()
   const cookieJson = JSON.stringify(cookies)
   fs.writeFileSync('new_cookies_lbc.json', cookieJson)
-  console.log(cookieJson);
+  console.log(cookieJson);*/
 
 })
