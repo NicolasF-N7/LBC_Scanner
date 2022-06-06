@@ -56,6 +56,7 @@ puppeteer.launch({ headless: false, defaultViewport: null, args:['--start-maximi
   let adsList = await mainContainer.evaluate(el => el.innerHTML);
   console.log(mainContainer);
   console.log(adsList);
+	console.log("ENORME");
   //const firstChild = await
 
   /*await page.waitForTimeout(50000)
